@@ -17,11 +17,12 @@ async def fetch_recent(page: int, per_page: int) -> dict:
         res.raise_for_status()
         data = res.json()
         
-        if "data" in data:
-            data["data"] = [AnimeObject(**anime).model_dump() for anime in data["data"]]
+        result = data.copy()
+        if "data" in result:
+            result["data"] = [AnimeObject(**anime).model_dump() for anime in result["data"]]
             
-        cache[cache_key] = data
-        return data
+        cache[cache_key] = result
+        return result
 
 async def fetch_series(series_id: str) -> SeriesDetail:
     cache = get_cache("series", default_ttl=7200)
@@ -39,10 +40,13 @@ async def fetch_series(series_id: str) -> SeriesDetail:
         if "episodes" in data:
             for ep in data["episodes"]:
                 embed_id = ep.get("episode_embed_id")
-                ep["embed_url"] = {
-                    "sub": f"https://megaplay.buzz/stream/s-2/{embed_id}/sub",
-                    "dub": f"https://megaplay.buzz/stream/s-2/{embed_id}/dub" if data.get("anime", {}).get("has_dub") else None
-                }
+                if embed_id:
+                    ep["embed_url"] = {
+                        "sub": f"https://megaplay.buzz/stream/s-2/{embed_id}/sub",
+                        "dub": f"https://megaplay.buzz/stream/s-2/{embed_id}/dub" if data.get("anime", {}).get("has_dub") else None
+                    }
+                else:
+                    ep["embed_url"] = {"sub": "", "dub": None}
                 
         series_detail = SeriesDetail(**data)
         cache[series_id] = series_detail
