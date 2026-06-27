@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+httpx
+anthropic
+cachetools
+python-dotenv
+pydantic
+slowapi
+pytest
+pytest-asyncio
+httpx[cli]
