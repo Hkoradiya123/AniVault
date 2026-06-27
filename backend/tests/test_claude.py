@@ -76,19 +76,19 @@ def test_claude_summarize(mock_create):
 def test_claude_recommend_exception(mock_create):
     mock_create.side_effect = Exception("API Error")
     
-    with pytest.raises(Exception, match="API Error"):
-        get_recommendations(UserProfile(), [{"id": "1"}], [], 1)
+    res = get_recommendations(UserProfile(), [{"id": "1"}], [], 1)
+    assert res == []
 
 @patch("services.claude.client.messages.create")
 def test_claude_search_exception(mock_create):
     mock_create.side_effect = Exception("API Error")
     
-    with pytest.raises(Exception, match="API Error"):
-        search_anime("some query", [{"id": "3"}])
+    res = search_anime("some query", [{"id": "3"}])
+    assert res == []
 
 @patch("services.claude.client.messages.create")
 def test_claude_summarize_exception(mock_create):
     mock_create.side_effect = Exception("API Error")
     
-    with pytest.raises(Exception, match="API Error"):
-        summarize_episode("Test Anime", 1)
+    res = summarize_episode("Test Anime", 1)
+    assert res == "Summary unavailable for Test Anime episode 1."

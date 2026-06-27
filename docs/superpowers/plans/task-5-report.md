@@ -7,10 +7,10 @@
 2. **Services (`backend/services/claude.py`)**: 
    - Created `get_recommendations`, `search_anime`, `summarize_episode`.
    - Extracted DRY helper `_call_claude_json()` for API calls and parsing.
-   - Intentionally let exceptions bubble up (removed `try/except`) so that the global 500 error handler catches them, conforming to the "no internal details exposed" constraint.
-   - Handled JSON decode errors robustly by stripping markdown JSON backticks from Claude's response.
+   - Includes graceful fallback for API/JSON parsing errors (returns `[]` or generic string) as mandated by the plan, ensuring the frontend doesn't crash on LLM failures.
+   - Handled JSON decode errors robustly using regex to extract markdown JSON blocks from Claude's response.
 3. **Tests (`backend/tests/test_claude.py`)**: 
-   - Added robust tests for success paths (4 tests) and exception-bubbling paths (3 tests). 
+   - Added robust tests for success paths (4 tests) and exception-fallback paths (3 tests). 
    - Used accurate `client.messages.create` output mocking (list of blocks with `.text` attributes).
 
 ## Testing and TDD Evidence
@@ -23,7 +23,7 @@
 
 ## Self-Review Findings
 - **Completeness**: Yes, all requirements from the plan and context limits are implemented.
-- **Quality**: Proper Pydantic schemas and mock structures are used. Exception fallback logic was removed to conform with global constraints, and exception propagation is correctly tested.
+- **Quality**: Proper Pydantic schemas and mock structures are used. Exception fallback logic gracefully degrades on LLM failures, and fallback values are correctly tested.
 - **Discipline**: No architectural deviations.
 
 ## Issues or Concerns
