@@ -5,15 +5,23 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 import os
 from dotenv import load_dotenv
+from fastapi.responses import JSONResponse
 
 from routes.health import router as health_router
+from core import limiter
 
 load_dotenv()
 
-limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(title="AniMind Backend")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+@app.exception_handler(Exception)
+async def generic_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=500,
+        content={"error": "Something went wrong"},
+    )
 
 allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173").split(",")
 app.add_middleware(
