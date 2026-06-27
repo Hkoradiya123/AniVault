@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
 
 from routes.health import router as health_router
+from routes.anime import router as anime_router
 from core import limiter
 
 load_dotenv()
@@ -32,4 +33,5 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(anime_router)
 app.include_router(health_router)
