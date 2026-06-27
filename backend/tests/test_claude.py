@@ -71,3 +71,24 @@ def test_claude_summarize(mock_create):
     args, kwargs = mock_create.call_args
     content = kwargs["messages"][0]["content"]
     assert "recap of episode 1 of the anime 'Test Anime'" in content
+
+@patch("services.claude.client.messages.create")
+def test_claude_recommend_exception(mock_create):
+    mock_create.side_effect = Exception("API Error")
+    
+    with pytest.raises(Exception, match="API Error"):
+        get_recommendations(UserProfile(), [{"id": "1"}], [], 1)
+
+@patch("services.claude.client.messages.create")
+def test_claude_search_exception(mock_create):
+    mock_create.side_effect = Exception("API Error")
+    
+    with pytest.raises(Exception, match="API Error"):
+        search_anime("some query", [{"id": "3"}])
+
+@patch("services.claude.client.messages.create")
+def test_claude_summarize_exception(mock_create):
+    mock_create.side_effect = Exception("API Error")
+    
+    with pytest.raises(Exception, match="API Error"):
+        summarize_episode("Test Anime", 1)

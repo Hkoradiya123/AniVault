@@ -1,9 +1,10 @@
 import anthropic
 import json
+import os
 from models.recommend import UserProfile
 from typing import List, Dict, Any
 
-client = anthropic.Anthropic()
+client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY", "dummy"))
 
 def _call_claude_json(prompt: str) -> List[Dict[str, Any]]:
     msg = client.messages.create(
@@ -11,7 +12,14 @@ def _call_claude_json(prompt: str) -> List[Dict[str, Any]]:
         max_tokens=1000,
         messages=[{"role": "user", "content": prompt}]
     )
-    return json.loads(msg.content[0].text)
+    text = msg.content[0].text.strip()
+    if text.startswith("```json"):
+        text = text[7:]
+    elif text.startswith("```"):
+        text = text[3:]
+    if text.endswith("```"):
+        text = text[:-3]
+    return json.loads(text.strip())
 
 def get_recommendations(profile: UserProfile, pool: List[Dict[str, Any]], exclude: List[str], count: int, mood: str = None) -> List[Dict[str, Any]]:
     if mood:
