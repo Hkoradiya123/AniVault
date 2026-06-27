@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Request
 from services.anikoto import fetch_recent, fetch_series
 from core import limiter
+from models.anime import SeriesDetail, AnimeObject
 
 router = APIRouter(prefix="/api")
 
@@ -9,7 +10,7 @@ router = APIRouter(prefix="/api")
 async def get_recent(request: Request, page: int = 1, per_page: int = 20) -> dict:
     return await fetch_recent(page, per_page)
 
-@router.get("/series/{series_id}")
+@router.get("/series/{series_id}", response_model=SeriesDetail)
 @limiter.limit("20/minute")
-async def get_series(request: Request, series_id: str) -> dict:
+async def get_series(request: Request, series_id: str):
     return await fetch_series(series_id)
